@@ -1,0 +1,3 @@
+Dx Dx 为机械结构值
+Dx Dx WzX WzY WzZ 全部改为0  从界面上取X Y Z填入WzX WzY WzZ
+Dx Dy恢复机械结构值

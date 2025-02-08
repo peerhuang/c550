@@ -1,0 +1,698 @@
+//设置基本参数和电机的限制参数，如果设计的时候修改了基本构造，需要在此处进行修改,该页带上PLC得电后只运行一次
+	
+	IF bLoad= TRUE THEN
+		RETURN;
+	END_IF
+	
+	J0_Sim:=GVLPers.J0Sim;//修改是否绞车使用仿真
+	J12345_Sim:=FALSE;//修改其他几个运动电机是否使用仿真
+	J1_Sim:=FALSE;
+	J2_Sim:=FALSE;
+	J3_Sim:=FALSE;
+	J5_Sim:=FALSE;
+	
+	GVL.st6.Config.Enable := TRUE;				//设置处于激活状态
+	GVL.st6.Config.AxisNum     := 6;			//设置轴数
+	
+	
+	//各电机轴的基本参数如上下极限、速度、加速度、电子齿轮比、方向等
+	Axis4Dir[0]:=1.0;
+	Axis4Dir[1]:=-1.0;
+	Axis4Dir[2]:=-1.0;
+	Axis4Dir[3]:=1.0;
+
+	//J0提升（滚筒类型）
+	i:=0;
+
+	GVL.st6.Para.Axis[i].iSAxis2Roller := TRUE;
+	//1-Z轴高度与电机数据比例关系
+	//电机数据
+	GVL.st6.Para.Axis[i].RollerList[0,0]:=-800;
+	GVL.st6.Para.Axis[i].RollerList[0,1]:=0;
+	GVL.st6.Para.Axis[i].RollerList[0,2]:=1800;
+	
+	//Z轴数据
+	GVL.st6.Para.Axis[i].RollerList[1,0]:=417.78;
+	GVL.st6.Para.Axis[i].RollerList[1,1]:=0;
+	GVL.st6.Para.Axis[i].RollerList[1,2]:=-940;
+
+	
+	GVL.st6.Para.Axis[i].RollerListLen:=3;
+	
+	
+	GVL.st6.Para.Axis[i].iSAxis2Joint := FALSE;
+	
+	GVL.st6.Para.Axis[i].Enable      := TRUE;	
+	
+	GVL.st6.Para.Axis[i].AxisDir := -1.0;
+	
+	GVL.st6.Para.Axis[i].LagErrorLimit    := 50;	
+	GVL.st6.Para.Axis[i].SetLagErrorLimit    := 100;
+	
+	
+	
+	IF  J0_Sim THEN 
+		GVL.st6.Para.Axis[i].LimitPos    := 5800;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -52375;
+		
+		GVL.st6.Para.Axis[i].LimitPos_J    := 27350;	
+		GVL.st6.Para.Axis[i].LimitNeg_J    := -3000;
+	ELSE 
+		GVL.st6.Para.Axis[i].LimitPos    := 5800;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -52375;
+		
+		GVL.st6.Para.Axis[i].LimitPos_J    := 27350;	
+		GVL.st6.Para.Axis[i].LimitNeg_J    := -3000;
+	END_IF
+	
+
+	
+	
+	GVL.st6.Para.Axis[i].Vel         := 1000;
+	GVL.st6.Para.Axis[i].Acc         := 800;
+	GVL.st6.Para.Axis[i].Jerk        := 8000;
+	
+	GVL.st6.Para.Axis[i].SrampVel    := 800;
+	GVL.st6.Para.Axis[i].SrampAcc    := 500;
+	GVL.st6.Para.Axis[i].SrampJerk   := GVL.st6.Para.Axis[i].SrampAcc;
+	
+	GVL.st6.Para.Axis[i].JogVel      := 300;
+	GVL.st6.Para.Axis[i].JogAcc      := 300;
+	GVL.st6.Para.Axis[i].JogJerk     := 300;
+
+	GVL.st6.Para.Axis[i].EStopAcc    := 1000;
+	GVL.st6.Para.Axis[i].EStopJerk   := 2000;
+	GVL.st6.Para.Axis[i].GearRatio   := 360.0/24.82;
+	GVL.st6.Para.Axis[i].RevCount    := 65535;
+	GVL.st6.Para.Axis[i].HomeOffset  := 0;
+	//GVL.st6.Para.Axis[0].Modeope    := 8;
+	GVL.st6.Para.Axis[i].FiltTime    := 0.08;
+	GVL.st6.Para.Axis[i].HomeLag     := 1000;
+	GVL.st6.Para.Axis[i].HomeVelLimt := 5;
+	
+	GVL.st6.Para.Axis[i].EffectVel:=5;
+	GVL.st6.Para.Axis[i].TorqueLimit:=300;
+	GVL.st6.Para.Axis[i].VelWaveLimit:=25;
+	GVL.st6.Para.Axis[i].VelWaveLimitTimePercent:=0.7;
+	GVL.st6.Para.Axis[i].OverRunTimeLimit:=15;
+	
+	
+	
+	
+	
+	//J1大臂（三角形）
+	i:=1;
+
+	GVL.st6.Para.Axis[i].iSAxis2Joint    := TRUE;
+	GVL.st6.Para.Axis[i].Dir    := -1.0;
+	GVL.st6.Para.Axis[i].LA    := 1246;
+	GVL.st6.Para.Axis[i].LB    := 2669;//变化很小
+	GVL.st6.Para.Axis[i].LZero    := 1764;//变化很小
+	GVL.st6.Para.Axis[i].JZero:=L2CosA(LA:=GVL.st6.Para.Axis[1].LA,LB:=GVL.st6.Para.Axis[1].LB,LZero:=GVL.st6.Para.Axis[1].LZero);
+	GVL.st6.Para.Axis[i].JZeroOffset:=-GVL.st6.Para.Axis[1].JZero;
+	
+	GVL.st6.Para.Axis[i].LimitPos_J    := 5.7;	//需要根据电缸长度计算限位
+	GVL.st6.Para.Axis[i].LimitNeg_J    := -23;
+	
+	GVL.st6.Para.Axis[i].Enable      := TRUE;	
+	GVL.st6.Para.Axis[i].AxisDir := -1.0;
+	
+	GVL.st6.Para.Axis[i].LagErrorLimit    := 20;	
+	GVL.st6.Para.Axis[i].SetLagErrorLimit    := 20;
+	
+	IF (GVL.st6.Para.Axis[i].AxisDir>0)THEN
+		GVL.st6.Para.Axis[i].LimitPos    := 470;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -99;
+	ELSE
+		GVL.st6.Para.Axis[i].LimitPos    := 99;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -470;
+	END_IF
+	
+	GVL.st6.Para.Axis[i].Vel         := 40;
+	GVL.st6.Para.Axis[i].Acc         := 80;
+	GVL.st6.Para.Axis[i].Jerk        := 800;
+	
+	GVL.st6.Para.Axis[i].SrampVel    := 23;
+	GVL.st6.Para.Axis[i].SrampAcc    := 23;
+	GVL.st6.Para.Axis[i].SrampJerk   := 3*GVL.st6.Para.Axis[i].SrampAcc;
+	
+	GVL.st6.Para.Axis[i].JogVel      := 10;
+	GVL.st6.Para.Axis[i].JogAcc      := 10;
+	GVL.st6.Para.Axis[i].JogJerk     := 3*10;
+
+	GVL.st6.Para.Axis[i].EStopAcc    := 50;
+	GVL.st6.Para.Axis[i].EStopJerk   := 500;
+	GVL.st6.Para.Axis[i].GearRatio   := 360.0/1.0;
+	GVL.st6.Para.Axis[i].RevCount    := 65535;
+	GVL.st6.Para.Axis[i].HomeOffset  := 0;
+	//GVL.st6.Para.Axis[0].Modeope    := 8;
+	GVL.st6.Para.Axis[i].FiltTime    := 0.08;
+	GVL.st6.Para.Axis[i].HomeLag     := 1000;
+	GVL.st6.Para.Axis[i].HomeVelLimt := 5;
+	
+	GVL.st6.Para.Axis[i].EffectVel:=5;
+	GVL.st6.Para.Axis[i].TorqueLimit:=114;
+	GVL.st6.Para.Axis[i].VelWaveLimit:=5;
+	GVL.st6.Para.Axis[i].VelWaveLimitTimePercent:=0.7;
+	GVL.st6.Para.Axis[i].OverRunTimeLimit:=15;
+	
+	
+	
+	//J2倾斜补偿（三角形）
+	i:=2;
+	
+	GVL.st6.Para.Axis[i].iSAxis2Joint    := TRUE;
+	GVL.st6.Para.Axis[i].Dir    := 1.0;
+	GVL.st6.Para.Axis[i].LA    := 2599;//2601;
+	GVL.st6.Para.Axis[i].LB    := 1210;//1301;
+	GVL.st6.Para.Axis[i].LZero    := 2107;//2096;
+	GVL.st6.Para.Axis[i].JZero:=L2CosA(GVL.st6.Para.Axis[2].LA,GVL.st6.Para.Axis[2].LB,GVL.st6.Para.Axis[2].LZero);
+	GVL.st6.Para.Axis[i].JZeroOffset:=-GVL.st6.Para.Axis[2].JZero;
+	
+	GVL.st6.Para.Axis[i].LimitPos_J    := 27.1;	//需要根据电缸长度计算限位
+	GVL.st6.Para.Axis[i].LimitNeg_J    := -8.3;
+		
+	GVL.st6.Para.Axis[i].Enable      := TRUE;	
+	GVL.st6.Para.Axis[i].AxisDir := -1.0;
+	
+	GVL.st6.Para.Axis[i].LagErrorLimit    := 20;	
+	GVL.st6.Para.Axis[i].SetLagErrorLimit    := 20;
+	
+	IF (GVL.st6.Para.Axis[i].AxisDir>0)THEN
+		GVL.st6.Para.Axis[i].LimitPos    := 610;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -186;
+	ELSE
+		GVL.st6.Para.Axis[i].LimitPos    := 186;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -610;
+	END_IF
+	
+	GVL.st6.Para.Axis[i].Vel         := 50;
+	GVL.st6.Para.Axis[i].Acc         := 100;
+	GVL.st6.Para.Axis[i].Jerk        := 1000;
+	
+	GVL.st6.Para.Axis[i].SrampVel    := 23;
+	GVL.st6.Para.Axis[i].SrampAcc    := 23;
+	GVL.st6.Para.Axis[i].SrampJerk   := 3*GVL.st6.Para.Axis[i].SrampAcc;
+	
+	GVL.st6.Para.Axis[i].JogVel      := 10;
+	GVL.st6.Para.Axis[i].JogAcc      := 10;
+	GVL.st6.Para.Axis[i].JogJerk     := 3*10;
+
+	GVL.st6.Para.Axis[i].EStopAcc    := 50;
+	GVL.st6.Para.Axis[i].EStopJerk   := 500;
+	GVL.st6.Para.Axis[i].GearRatio   := 360.0/1.0;
+	GVL.st6.Para.Axis[i].RevCount    := 65535;
+	GVL.st6.Para.Axis[i].HomeOffset  := 0;
+	//GVL.st6.Para.Axis[0].Modeope    := 8;
+	GVL.st6.Para.Axis[i].FiltTime    := 0.08;
+	GVL.st6.Para.Axis[i].HomeLag     := 1000;
+	GVL.st6.Para.Axis[i].HomeVelLimt := 5;
+	
+	GVL.st6.Para.Axis[i].EffectVel:=5;
+	GVL.st6.Para.Axis[i].TorqueLimit:=76;
+	GVL.st6.Para.Axis[i].VelWaveLimit:=5;
+	GVL.st6.Para.Axis[i].VelWaveLimitTimePercent:=0.7;
+	GVL.st6.Para.Axis[i].OverRunTimeLimit:=15;
+	
+	
+	
+	
+	//J3旋转
+	i:=3;
+	
+	GVL.st6.Para.Axis[i].iSAxis2Joint := FALSE;
+	
+	GVL.st6.Para.Axis[i].Enable      := TRUE;	
+	
+	GVL.st6.Para.Axis[i].LimitPos_J    := 91;
+	GVL.st6.Para.Axis[i].LimitNeg_J    := -91;
+	
+	GVL.st6.Para.Axis[i].AxisDir := 1.0;
+	
+	GVL.st6.Para.Axis[i].LagErrorLimit    := 2;	
+	GVL.st6.Para.Axis[i].SetLagErrorLimit    := 2;
+	
+	IF (GVL.st6.Para.Axis[i].AxisDir>0)THEN
+		GVL.st6.Para.Axis[i].LimitPos    := 91;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -91;
+	ELSE
+		GVL.st6.Para.Axis[i].LimitPos    := 91;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -91;	
+	END_IF
+	
+	GVL.st6.Para.Axis[i].Vel         := 23;
+	GVL.st6.Para.Axis[i].Acc         := 46;
+	GVL.st6.Para.Axis[i].Jerk        := 460;
+	
+	GVL.st6.Para.Axis[i].SrampVel    := 22.5;//3.75RPM
+	GVL.st6.Para.Axis[i].SrampAcc    := 15;
+	GVL.st6.Para.Axis[i].SrampJerk   := 3*GVL.st6.Para.Axis[i].SrampAcc;
+	
+	GVL.st6.Para.Axis[i].JogVel      := 5;
+	GVL.st6.Para.Axis[i].JogAcc      := 10;
+	GVL.st6.Para.Axis[i].JogJerk     := 3*10;
+
+	GVL.st6.Para.Axis[i].EStopAcc    := 50;
+	GVL.st6.Para.Axis[i].EStopJerk   := 500;
+	GVL.st6.Para.Axis[i].GearRatio   := 360.0/0.6222355887645;
+	GVL.st6.Para.Axis[i].RevCount    := 65535;
+	GVL.st6.Para.Axis[i].HomeOffset  := 0;
+	//GVL.st6.Para.Axis[0].Modeope    := 8;
+	GVL.st6.Para.Axis[i].FiltTime    := 0.08;
+	GVL.st6.Para.Axis[i].HomeLag     := 1000;
+	GVL.st6.Para.Axis[i].HomeVelLimt := 5;
+	
+	GVL.st6.Para.Axis[i].EffectVel:=5;
+	GVL.st6.Para.Axis[i].TorqueLimit:=34;
+	GVL.st6.Para.Axis[i].VelWaveLimit:=5;
+	GVL.st6.Para.Axis[i].VelWaveLimitTimePercent:=0.7;
+	GVL.st6.Para.Axis[i].OverRunTimeLimit:=15;
+	
+	
+	//J4副臂
+	i:=4;
+	
+	GVL.st6.Para.Axis[i].iSAxis2Joint := FALSE;
+	
+	GVL.st6.Para.Axis[i].Enable      := TRUE;	
+	
+	GVL.st6.Para.Axis[i].LimitPos_J    := 54;
+	GVL.st6.Para.Axis[i].LimitNeg_J    := -15.9;
+		
+	GVL.st6.Para.Axis[i].AxisDir := -1.0*Axis4Dir[GVLPers.gPersData.J4Master];
+	
+	GVL.st6.Para.Axis[i].LagErrorLimit    := 1;	
+	GVL.st6.Para.Axis[i].SetLagErrorLimit    := 1;
+	
+	IF (GVL.st6.Para.Axis[i].AxisDir>0)THEN
+		GVL.st6.Para.Axis[i].LimitPos    := 54;	//48
+		GVL.st6.Para.Axis[i].LimitNeg    := -15.9;
+	ELSE
+		GVL.st6.Para.Axis[i].LimitPos    := 15.9;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -54;
+	END_IF
+	
+	GVL.st6.Para.Axis[i].Vel         := 5.4;
+	GVL.st6.Para.Axis[i].Acc         := 12;
+	GVL.st6.Para.Axis[i].Jerk        := 120;
+	
+	GVL.st6.Para.Axis[i].SrampVel    := 4.98;//0.83RPM
+	GVL.st6.Para.Axis[i].SrampAcc    := 3;
+	GVL.st6.Para.Axis[i].SrampJerk   := 3*GVL.st6.Para.Axis[i].SrampAcc;
+	
+	GVL.st6.Para.Axis[i].JogVel      := 1.5;
+	GVL.st6.Para.Axis[i].JogAcc      := 2;
+	GVL.st6.Para.Axis[i].JogJerk     := 3*3;
+
+	GVL.st6.Para.Axis[i].EStopAcc    := 15;
+	GVL.st6.Para.Axis[i].EStopJerk   := 80;
+	GVL.st6.Para.Axis[i].GearRatio   := 360.0/0.312053049;
+	GVL.st6.Para.Axis[i].RevCount    := 65535;
+	GVL.st6.Para.Axis[i].HomeOffset  := 0;
+	//GVL.st6.Para.Axis[0].Modeope    := 8;
+	GVL.st6.Para.Axis[i].FiltTime    := 0.08;
+	GVL.st6.Para.Axis[i].HomeLag     := 1000;
+	GVL.st6.Para.Axis[i].HomeVelLimt := 5;
+	
+	GVL.st6.Para.Axis[i].EffectVel:=5;
+	GVL.st6.Para.Axis[i].TorqueLimit:=50;
+	GVL.st6.Para.Axis[i].VelWaveLimit:=5;
+	GVL.st6.Para.Axis[i].VelWaveLimitTimePercent:=0.7;
+	GVL.st6.Para.Axis[i].OverRunTimeLimit:=15;
+	
+	
+	//J5钳头倾斜（三角形）
+	i:=5;
+		
+	GVL.st6.Para.Axis[i].iSAxis2Joint    := TRUE;
+	GVL.st6.Para.Axis[i].Dir    := 1.0;
+	GVL.st6.Para.Axis[i].LA    := 2886;//2570;
+	GVL.st6.Para.Axis[i].LB    := 693;//771;
+	GVL.st6.Para.Axis[i].LZero    := 3373;//3060;
+	GVL.st6.Para.Axis[i].JZero:=L2CosA(GVL.st6.Para.Axis[5].LA,GVL.st6.Para.Axis[5].LB,GVL.st6.Para.Axis[5].LZero);
+	GVL.st6.Para.Axis[i].JZeroOffset:=-GVL.st6.Para.Axis[5].JZero;
+	
+	GVL.st6.Para.Axis[i].LimitPos_J    := 17.2;	//TCP时判断轴限位超差有角度使用角度
+	GVL.st6.Para.Axis[i].LimitNeg_J    := -83.2;
+		
+	GVL.st6.Para.Axis[i].Enable      := TRUE;	
+	
+	GVL.st6.Para.Axis[i].AxisDir := -1.0;
+	
+	GVL.st6.Para.Axis[i].LagErrorLimit    := 20;	
+	GVL.st6.Para.Axis[i].SetLagErrorLimit    := 20;
+	
+	IF (GVL.st6.Para.Axis[i].AxisDir>0)THEN
+		GVL.st6.Para.Axis[i].LimitPos    := 143;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -1023;
+	ELSE
+		GVL.st6.Para.Axis[i].LimitPos    := 1023;	
+		GVL.st6.Para.Axis[i].LimitNeg    := -143;
+	END_IF
+	
+	GVL.st6.Para.Axis[i].Vel         := 50;
+	GVL.st6.Para.Axis[i].Acc         := 100;
+	GVL.st6.Para.Axis[i].Jerk        := 1000;
+	
+	GVL.st6.Para.Axis[i].SrampVel    := 40;
+	GVL.st6.Para.Axis[i].SrampAcc    := 50;
+	GVL.st6.Para.Axis[i].SrampJerk   := 3*GVL.st6.Para.Axis[i].SrampAcc;
+	
+	GVL.st6.Para.Axis[i].JogVel      := 10;
+	GVL.st6.Para.Axis[i].JogAcc      := 10;
+	GVL.st6.Para.Axis[i].JogJerk     := 3*10;
+
+	GVL.st6.Para.Axis[i].EStopAcc    := 200;
+	GVL.st6.Para.Axis[i].EStopJerk   := 1000;
+	GVL.st6.Para.Axis[i].GearRatio   := 360.0/1.0;
+	GVL.st6.Para.Axis[i].RevCount    := 65535;
+	GVL.st6.Para.Axis[i].HomeOffset  := 0;
+	//GVL.st6.Para.Axis[0].Modeope    := 8;
+	GVL.st6.Para.Axis[i].FiltTime    := 0.08;
+	GVL.st6.Para.Axis[i].HomeLag     := 1000;
+	GVL.st6.Para.Axis[i].HomeVelLimt := 5;
+	
+	GVL.st6.Para.Axis[i].EffectVel:=5;
+	GVL.st6.Para.Axis[i].TorqueLimit:=57;
+	GVL.st6.Para.Axis[i].VelWaveLimit:=5;
+	GVL.st6.Para.Axis[i].VelWaveLimitTimePercent:=0.7;
+	GVL.st6.Para.Axis[i].OverRunTimeLimit:=15;
+	
+	
+	
+	AxGrParaInit_0(Enable:= TRUE, pAxGrCtrl:= ADR(GVL.st6), Error=> , ErrorID=> );
+	GVL.st6.Status.Axes.Monitor.Error   := AxGrParaInit_0.Error;
+	GVL.st6.Status.Axes.Monitor.ErrorID := AxGrParaInit_0.ErrorID;
+	AxGrErr := AxGrParaInit_0.Error;
+	
+	
+	//修改末端的位置和姿态限制	
+	GVL.st6.para.AttiLimit[0].LimitPos:=99999999;
+	GVL.st6.para.AttiLimit[1].LimitPos:=99999999;
+	GVL.st6.para.AttiLimit[2].LimitPos:=99999999;
+	GVL.st6.para.AttiLimit[3].LimitPos:=3;
+	GVL.st6.para.AttiLimit[4].LimitPos:=120;
+	GVL.st6.para.AttiLimit[5].LimitPos:=90;
+	
+	GVL.st6.para.AttiLimit[0].LimitNeg:=-99999999;
+	GVL.st6.para.AttiLimit[1].LimitNeg:=-99999999;
+	GVL.st6.para.AttiLimit[2].LimitNeg:=-3012;
+	GVL.st6.para.AttiLimit[3].LimitNeg:=-3;
+	GVL.st6.para.AttiLimit[4].LimitNeg:=-120;
+	GVL.st6.para.AttiLimit[5].LimitNeg:=-90;
+	
+	
+	GVL.st6.para.AttiLimit[0].MaxVel:=200;
+	GVL.st6.para.AttiLimit[1].MaxVel:=200;
+	GVL.st6.para.AttiLimit[2].MaxVel:=490;
+	GVL.st6.para.AttiLimit[3].MaxVel:=4;
+	GVL.st6.para.AttiLimit[4].MaxVel:=4;
+	GVL.st6.para.AttiLimit[5].MaxVel:=23;
+	
+	GVL.st6.para.AttiLimit[0].MaxAcc:=200;
+	GVL.st6.para.AttiLimit[1].MaxAcc:=200;
+	GVL.st6.para.AttiLimit[2].MaxAcc:=220;
+	GVL.st6.para.AttiLimit[3].MaxAcc:=3;
+	GVL.st6.para.AttiLimit[4].MaxAcc:=3;
+	GVL.st6.para.AttiLimit[5].MaxAcc:=50;
+	
+	GVL.st6.para.AttiLimit[0].MaxJerk:=5*200;
+	GVL.st6.para.AttiLimit[1].MaxJerk:=5*200;
+	GVL.st6.para.AttiLimit[2].MaxJerk:=5*220;
+	GVL.st6.para.AttiLimit[3].MaxJerk:=5*3;
+	GVL.st6.para.AttiLimit[4].MaxJerk:=5*3;
+	GVL.st6.para.AttiLimit[5].MaxJerk:=5*50;
+	
+	GVL.st6.para.AttiLimit[0].Vel:=180;
+	GVL.st6.para.AttiLimit[1].Vel:=180;
+	GVL.st6.para.AttiLimit[2].Vel:=450;
+	GVL.st6.para.AttiLimit[3].Vel:=0.5;
+	GVL.st6.para.AttiLimit[4].Vel:=3.98;
+	GVL.st6.para.AttiLimit[5].Vel:=22.5;
+	
+	GVL.st6.para.AttiLimit[0].Acc:=80;
+	GVL.st6.para.AttiLimit[1].Acc:=80;
+	GVL.st6.para.AttiLimit[2].Acc:=200;
+	GVL.st6.para.AttiLimit[3].Acc:=0.5;
+	GVL.st6.para.AttiLimit[4].Acc:=2.98;
+	GVL.st6.para.AttiLimit[5].Acc:=15;
+	
+	GVL.st6.para.AttiLimit[0].Jerk:=80;
+	GVL.st6.para.AttiLimit[1].Jerk:=80;
+	GVL.st6.para.AttiLimit[2].Jerk:=200;
+	GVL.st6.para.AttiLimit[3].Jerk:=5*0.5;
+	GVL.st6.para.AttiLimit[4].Jerk:=5*2.98;
+	GVL.st6.para.AttiLimit[5].Jerk:=5*15;
+	
+	GVL.st6.para.AttiLimit[0].JogVel:=180;
+	GVL.st6.para.AttiLimit[1].JogVel:=180;
+	GVL.st6.para.AttiLimit[2].JogVel:=450;
+	GVL.st6.para.AttiLimit[3].JogVel:=0.5;
+	GVL.st6.para.AttiLimit[4].JogVel:=3.98;
+	GVL.st6.para.AttiLimit[5].JogVel:=22.5;
+	
+	GVL.st6.para.AttiLimit[0].JogAcc:=80;
+	GVL.st6.para.AttiLimit[1].JogAcc:=80;
+	GVL.st6.para.AttiLimit[2].JogAcc:=180;
+	GVL.st6.para.AttiLimit[3].JogAcc:=0.5;
+	GVL.st6.para.AttiLimit[4].JogAcc:=2.98;
+	GVL.st6.para.AttiLimit[5].JogAcc:=15;
+	
+	GVL.st6.para.AttiLimit[0].JogJerk:=5*80;
+	GVL.st6.para.AttiLimit[1].JogJerk:=5*80;
+	GVL.st6.para.AttiLimit[2].JogJerk:=5*180;
+	GVL.st6.para.AttiLimit[3].JogJerk:=5*0.5;
+	GVL.st6.para.AttiLimit[4].JogJerk:=5*2.98;
+	GVL.st6.para.AttiLimit[5].JogJerk:=5*15;
+	
+	GVL.st6.para.AttiLimit[6]:=GVL.st6.para.AttiLimit[0];
+	
+	//各关节原点位置初始化
+	GVL.st6.Para.Axis[0].HomeOffset := GVLPers.gPersData.HomeOffset[0];
+	GVL.st6.Para.Axis[1].HomeOffset := GVLPers.gPersData.HomeOffset[1];
+	GVL.st6.Para.Axis[2].HomeOffset := GVLPers.gPersData.HomeOffset[2];
+	GVL.st6.Para.Axis[3].HomeOffset := GVLPers.gPersData.HomeOffset[3];	
+	GVL.st6.Para.Axis[4].HomeOffset := GVLPers.gPersData.HomeOffset[4];
+	GVL.st6.Para.Axis[5].HomeOffset := GVLPers.gPersData.HomeOffset[5];
+	
+	//设置数据缓冲器的长度、电机数缓冲器的长度
+	GVL.gcb.QueneLen:=45;
+	GVL.gAxiscb[0].QueneLen:=45;	
+	GVL.gAxiscb[1].QueneLen:=45;
+	GVL.gAxiscb[2].QueneLen:=45;
+	GVL.gAxiscb[3].QueneLen:=45;
+	GVL.gAxiscb[4].QueneLen:=45;
+	GVL.gAxiscb[5].QueneLen:=45;
+	
+	
+	GVL.st6.config.DH_d4:=805;//1132;
+	GVL.st6.config.DH_a1:=1540;//1255;
+	GVL.st6.config.DH_a2:=5905;//5906;
+	GVL.st6.config.DH_a5:=2886;//3280;
+	
+	
+	//以下世界坐标偏移计算需要自行修改
+	GVL.st6.config.InitPos.x2:=-904;
+	GVL.st6.config.InitPos.x3:=0;
+	GVL.st6.config.InitPos.y:=0;
+	GVL.st6.config.InitPos.z:=-1212;
+	GVL.st6.config.InitPos.a:=0;
+	GVL.st6.config.InitPos.b:=90;
+	GVL.st6.config.InitPos.c:=0;
+	GVL.st6.config.InitPos.t:=0;
+	
+
+	
+	GVL.st6.config.Wz[0]:=GVLPers.gPersData.WzX;
+	GVL.st6.config.Wz[1]:=GVLPers.gPersData.WzY;
+	GVL.st6.config.Wz[2]:=GVLPers.gPersData.WzZ;
+	
+	
+	GVL.st6.config.DA:=GVLPers.gPersData.DA;
+	GVL.st6.config.DB:=GVLPers.gPersData.DB;
+	GVL.st6.config.DC:=GVLPers.gPersData.DC;
+	
+	GVL.st6.config.Dx:=GVLPers.gPersData.Dx;//350mm钳头夹持中心距离钳头旋转点X方向距离
+	GVL.st6.config.Dy:=GVLPers.gPersData.Dy;//800mm钳头夹持中心距离钳头旋转点Z方向距离
+	
+	GVL.st6.config.Dd:=SQRT(GVL.st6.config.Dx*GVL.st6.config.Dx+GVL.st6.config.Dy*GVL.st6.config.Dy);
+	IF(GVL.st6.config.Dd=0)THEN
+	GVL.st6.config.Da_Rad:=0;
+	ELSE
+	GVL.st6.config.Da_Rad:=ASIN(GVL.st6.config.Dx/GVL.st6.config.Dd);
+	END_IF
+	
+	GVL.st6.config.Da_Deg:=GVL.st6.config.Da_Rad/PI*180.0;
+	
+	GVL.st6.config.DH_CX:=350;//钳头夹持中心距离钳头中心X距离，可能不准确需要调整
+	GVL.st6.config.DH_CZ:=0;//钳头夹持中心距离钳头中心Z距离
+	GVL.st6.config.DH_lx:=750;//钳头包络X长度一半
+	GVL.st6.config.DH_ly:=200;//钳头包络Y长度一半
+	GVL.st6.config.DH_lz:=600;//钳头包络Z长度一半
+	
+
+	
+	GVL.st6.config.ClampUpperTorqueSet:=INT_TO_REAL(GVLPers.gPersData.ClampUpperTorqueSet)/10.0;
+	GVL.st6.config.ClampLowerTorqueSet:=INT_TO_REAL(GVLPers.gPersData.ClampLowerTorqueSet)/10.0;
+	GVL.st6.config.ClampSupportTorqueSet:=INT_TO_REAL(GVLPers.gPersData.ClampSupportTorqueSet)/10.0;
+	GVL.st6.config.ClampUpperOutPosSet:=INT_TO_REAL(GVLPers.gPersData.ClampUpperOutPosSet)/10.0;
+	GVL.st6.config.ClampLowerOutPosSet:=INT_TO_REAL(GVLPers.gPersData.ClampLowerOutPosSet)/10.0;
+	GVL.st6.config.ClampSupportOutPosSet:=INT_TO_REAL(GVLPers.gPersData.ClampSupportOutPosSet)/10.0;
+	GVL.st6.config.ClampUpperInPosSet:=INT_TO_REAL(GVLPers.gPersData.ClampUpperInPosSet)/10.0;
+	GVL.st6.config.ClampLowerInPosSet:=INT_TO_REAL(GVLPers.gPersData.ClampLowerInPosSet)/10.0;
+	GVL.st6.config.ClampSupportInPosSet:=INT_TO_REAL(GVLPers.gPersData.ClampSupportInPosSet)/10.0;
+	
+	
+	
+	IF J0_Sim THEN 	
+		GVL.st6.config.J0Master:=0;
+		GVL.st6.config.J0Active[0]:=FALSE;	
+		GVL.st6.config.J0Active[1]:=FALSE;	
+		GVL.st6.config.J0Active[2]:=FALSE;	
+		GVL.st6.config.J0Active[3]:=FALSE;	
+		GVL.tAxisj0[0]:=ADR(LM_Drive_1);
+		GVL.tAxisj0[1]:=ADR(LM_Drive_7);
+		GVL.tAxisj0[2]:=ADR(LM_Drive_8);
+		GVL.tAxisj0[3]:=ADR(LM_Drive_9);
+				
+	ELSE
+		GVL.st6.config.J0Master:=GVLPers.gPersData.J0Master;
+		GVL.st6.config.J0Active:=GVLPers.gPersData.J0Active;	
+	
+		GVL.tAxisj0[0]:=ADR(DW1);
+		GVL.tAxisj0[1]:=ADR(DW2);
+		GVL.tAxisj0[2]:=ADR(DW3);
+		GVL.tAxisj0[3]:=ADR(DW4);	
+		
+	END_IF
+	
+	IF J12345_Sim THEN 	
+		GVL.st6.config.J4Master:=0;
+		GVL.st6.config.J4Active[0]:=FALSE;
+		GVL.st6.config.J4Active[1]:=FALSE;
+		GVL.st6.config.J4Active[2]:=FALSE;
+		GVL.st6.config.J4Active[3]:=FALSE;
+		GVL.tAxisj4[0]:=ADR(LM_Drive_5);
+		GVL.tAxisj4[1]:=ADR(LM_Drive_10);
+		GVL.tAxisj4[2]:=ADR(LM_Drive_11);
+		GVL.tAxisj4[3]:=ADR(LM_Drive_12);	
+	ELSE
+		GVL.st6.config.J4Master:=GVLPers.gPersData.J4Master;
+		GVL.st6.config.J4Active:=GVLPers.gPersData.J4Active;
+		
+		GVL.tAxisj4[0]:=ADR(AssistantArm1);
+		GVL.tAxisj4[1]:=ADR(AssistantArm2);
+		GVL.tAxisj4[2]:=ADR(AssistantArm3);
+		GVL.tAxisj4[3]:=ADR(AssistantArm4);	
+			
+	END_IF
+	
+
+		
+	//GVL.st6.config.HomeOffset[1]:=GVLPers.gPersData.HomeOffset[1];
+	//GVL.st6.config.HomeOffset[2]:=GVLPers.gPersData.HomeOffset[2];
+	//GVL.st6.config.HomeOffset[3]:=GVLPers.gPersData.HomeOffset[3];
+	//GVL.st6.config.HomeOffset[5]:=GVLPers.gPersData.HomeOffset[5];
+	
+	GVL.st6.config.HomeOffset[1]:=12496584;
+	GVL.st6.config.HomeOffset[2]:=1727099182;
+	GVL.st6.config.HomeOffset[3]:=126363396;
+	GVL.st6.config.HomeOffset[5]:=85690125;
+	
+	GVL.st6.config.J0HomeOffset[0]:=-443803429;
+	//GVL.st6.config.J0HomeOffset[0]:=GVLPers.gPersData.J0HomeOffset[0];
+	GVL.st6.config.J0HomeOffset[1]:=GVLPers.gPersData.J0HomeOffset[1];
+	GVL.st6.config.J0HomeOffset[2]:=GVLPers.gPersData.J0HomeOffset[2];
+	//GVL.st6.config.J0HomeOffset[3]:=GVLPers.gPersData.J0HomeOffset[3];
+	GVL.st6.config.J0HomeOffset[3]:=528219684;
+			
+	GVL.st6.config.J4HomeOffset[0]:=1233825588;					
+	//GVL.st6.config.J4HomeOffset[0]:=GVLPers.gPersData.J4HomeOffset[0];
+	GVL.st6.config.J4HomeOffset[1]:=GVLPers.gPersData.J4HomeOffset[1];
+	GVL.st6.config.J4HomeOffset[2]:=GVLPers.gPersData.J4HomeOffset[2];
+	GVL.st6.config.J4HomeOffset[3]:=GVLPers.gPersData.J4HomeOffset[3];
+	
+	
+	GVL.st6.config.HomeOffset[0]:=GVL.st6.config.J0HomeOffset[GVL.st6.config.J0Master];
+	GVL.st6.config.HomeOffset[4]:=GVL.st6.config.J4HomeOffset[GVL.st6.config.J4Master];
+	GVLPers.gPersData.HomeOffset[0]:=GVL.st6.config.HomeOffset[0];
+	GVLPers.gPersData.HomeOffset[4]:=GVL.st6.config.HomeOffset[4];
+
+	
+	
+	MainArm.iTorqueLimHighPct:=3000;
+	MainArm.iTorqueLimLowPct:=3000;
+	
+	AssistantArm1.iTorqueLimHighPct:=3000;
+	AssistantArm1.iTorqueLimLowPct:=3000;
+	AssistantArm2.iTorqueLimHighPct:=3000;
+	AssistantArm2.iTorqueLimLowPct:=3000;
+	AssistantArm3.iTorqueLimHighPct:=3000;
+	AssistantArm3.iTorqueLimLowPct:=3000;
+	AssistantArm4.iTorqueLimHighPct:=3000;
+	AssistantArm4.iTorqueLimLowPct:=3000;
+	
+	
+	DW1.iTorqueLimHighPct:=2000;
+	DW1.iTorqueLimLowPct:=2000;	
+	DW2.iTorqueLimHighPct:=2000;
+	DW2.iTorqueLimLowPct:=2000;
+	DW3.iTorqueLimHighPct:=2000;
+	DW3.iTorqueLimLowPct:=2000;
+	DW4.iTorqueLimHighPct:=2000;
+	DW4.iTorqueLimLowPct:=2000;
+	
+	
+	//钻台面
+	GVL.st6.config.StopWorkSpace[0].Active:=TRUE;
+	GVL.st6.config.StopWorkSpace[0].P1[0]:=-5000;
+	GVL.st6.config.StopWorkSpace[0].P1[1]:=-5000;
+	GVL.st6.config.StopWorkSpace[0].P1[2]:=-8000;
+	GVL.st6.config.StopWorkSpace[0].P2[0]:=5000;;
+	GVL.st6.config.StopWorkSpace[0].P2[1]:=5000;
+	GVL.st6.config.StopWorkSpace[0].P2[2]:=-3000;
+	
+	//Y正方向钢架
+	GVL.st6.config.StopWorkSpace[1].Active:=TRUE;
+	GVL.st6.config.StopWorkSpace[1].P1[0]:=-5000;
+	GVL.st6.config.StopWorkSpace[1].P1[1]:=1150;
+	GVL.st6.config.StopWorkSpace[1].P1[2]:=-8000;
+	GVL.st6.config.StopWorkSpace[1].P2[0]:=-1070;
+	GVL.st6.config.StopWorkSpace[1].P2[1]:=5000;
+	GVL.st6.config.StopWorkSpace[1].P2[2]:=26000;
+	
+	//Y负方向钢架
+	GVL.st6.config.StopWorkSpace[2].Active:=TRUE;
+	GVL.st6.config.StopWorkSpace[2].P1[0]:=-5000;
+	GVL.st6.config.StopWorkSpace[2].P1[1]:=-5000;
+	GVL.st6.config.StopWorkSpace[2].P1[2]:=-8000;
+	GVL.st6.config.StopWorkSpace[2].P2[0]:=-1070;
+	GVL.st6.config.StopWorkSpace[2].P2[1]:=-1150;
+	GVL.st6.config.StopWorkSpace[2].P2[2]:=26000;
+	
+	//Y正方向二层台
+	GVL.st6.config.StopWorkSpace[3].Active:=TRUE;
+	GVL.st6.config.StopWorkSpace[3].P1[0]:=-2000;
+	GVL.st6.config.StopWorkSpace[3].P1[1]:=1150;
+	GVL.st6.config.StopWorkSpace[3].P1[2]:=20000;
+	GVL.st6.config.StopWorkSpace[3].P2[0]:=2500;
+	GVL.st6.config.StopWorkSpace[3].P2[1]:=5000;
+	GVL.st6.config.StopWorkSpace[3].P2[2]:=22900;
+	
+	//Y负方向二层台
+	GVL.st6.config.StopWorkSpace[4].Active:=TRUE;
+	GVL.st6.config.StopWorkSpace[4].P1[0]:=-2000;
+	GVL.st6.config.StopWorkSpace[4].P1[1]:=-5000;
+	GVL.st6.config.StopWorkSpace[4].P1[2]:=20000;
+	GVL.st6.config.StopWorkSpace[4].P2[0]:=2500;
+	GVL.st6.config.StopWorkSpace[4].P2[1]:=-1150;
+	GVL.st6.config.StopWorkSpace[4].P2[2]:=22900;
+	
+	
+	AdjustJ0();
+	InitRobotBody();
+	
+	GVL.st6.status.Init:=GVL.st6.Para.Axis[0].iSAxis2Roller=FALSE OR GVL.st6.Para.Axis[0].iSAxis2RollerValid;
+
+	
+	bLoad:=TRUE;
